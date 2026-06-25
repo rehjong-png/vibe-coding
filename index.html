@@ -349,12 +349,28 @@
             return `${ampm} ${hoursStr}:${minutes}:${seconds}`;
         }
 
+        // 0-1. 메인 시계용 고급 스타일링된 AM/PM 시간 표시 HTML 헬퍼 함수
+        function formatAMPMHtml(date) {
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0시는 12시로 표시
+            const hoursStr = String(hours).padStart(2, '0');
+            
+            // AM(하늘색), PM(주황색) 구분하여 스타일링
+            const ampmColor = ampm === 'AM' ? '#38bdf8' : '#fb923c';
+            
+            return `<span style="font-size: 1.8rem; color: ${ampmColor}; font-weight: 700; margin-right: 12px; vertical-align: middle; letter-spacing: 1px;">${ampm}</span><span style="vertical-align: middle;">${hoursStr}:${minutes}:${seconds}</span>`;
+        }
+
         // 1. 실시간 시계 스크립트
         function updateClock() {
             const now = new Date();
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('current-date').textContent = now.toLocaleDateString('ko-KR', options);
-            document.getElementById('current-time').textContent = formatAMPM(now);
+            document.getElementById('current-time').innerHTML = formatAMPMHtml(now);
         }
         updateClock();
         setInterval(updateClock, 1000);
