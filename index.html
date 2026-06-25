@@ -246,17 +246,17 @@
             <div style="display: flex; flex-direction: column; gap: 30px;">
                 <!-- 날씨 카드 -->
                 <div class="card" style="flex: 1;">
-                    <h2>☀️ 오늘의 날씨 (Seoul)</h2>
+                    <h2>☀️ 오늘의 날씨 (<span id="weather-location">Seoul</span>)</h2>
                     <div class="weather-info">
-                        <div class="condition">흐림 (Cloudy)</div>
-                        <div class="temp">22°C</div>
-                        <p style="color: #718096; margin-top: 5px;">오후부터 비 소식 (80%)</p>
+                        <div id="weather-condition" class="condition">흐림 (Cloudy)</div>
+                        <div id="weather-temp" class="temp">22°C</div>
+                        <p id="weather-description" style="color: #718096; margin-top: 5px;">실시간 기상 데이터 확인 중...</p>
                     </div>
                     <div class="details">
-                        <div class="detail-item">🌡️ 최고 / 최저<br><strong>24°C / 19°C</strong></div>
-                        <div class="detail-item">💧 습도<br><strong>62%</strong></div>
-                        <div class="detail-item">🌬️ 바람<br><strong>동풍 4 mph</strong></div>
-                        <div class="detail-item">☀️ 자외선 지수<br><strong>3 (보통)</strong></div>
+                        <div class="detail-item">🌡️ 최고 / 최저<br><strong id="weather-temp-range">24°C / 19°C</strong></div>
+                        <div class="detail-item">💧 습도<br><strong id="weather-humidity">62%</strong></div>
+                        <div class="detail-item">🌬️ 바람<br><strong id="weather-wind">동풍 4 mph</strong></div>
+                        <div class="detail-item">☀️ 자외선 지수<br><strong id="weather-uv">3 (보통)</strong></div>
                     </div>
                 </div>
 
@@ -759,10 +759,134 @@
             }
         }
 
+        // 4. ☀️ 브라우저 Geolocation API 및 Open-Meteo 날씨 API 연동 스크립트
+        function getWeatherCondition(code) {
+            const mapping = {
+                0: { text: "맑음", icon: "☀️" },
+                1: { text: "대체로 맑음", icon: "🌤️" },
+                2: { text: "구름 조금", icon: "⛅" },
+                3: { text: "흐림", icon: "☁️" },
+                45: { text: "안개", icon: "🌫️" },
+                48: { text: "안개", icon: "🌫️" },
+                51: { text: "약한 이슬비", icon: "🌧️" },
+                53: { text: "이슬비", icon: "🌧️" },
+                55: { text: "강한 이슬비", icon: "🌧️" },
+                61: { text: "약한 비", icon: "🌧️" },
+                63: { text: "비", icon: "☔" },
+                65: { text: "강한 비", icon: "☔" },
+                71: { text: "약한 눈", icon: "❄️" },
+                73: { text: "눈", icon: "❄️" },
+                75: { text: "강한 눈", icon: "❄️" },
+                80: { text: "소나기", icon: "🌧️" },
+                81: { text: "소나기", icon: "🌧️" },
+                82: { text: "강한 소나기", icon: "🌧️" },
+                95: { text: "뇌우", icon: "⛈️" }
+            };
+            return mapping[code] || { text: "정보 없음", icon: "🌡️" };
+        }
+
+        function updateWeatherUI(locationName, data) {
+            const current = data.current;
+            const daily = data.daily;
+            
+            const temp = Math.round(current.temperature_2m);
+            const humidity = current.relative_humidity_2m;
+            const wind = current.wind_speed_10m.toFixed(1);
+            const code = current.weather_code;
+            
+            const tempMax = Math.round(daily.temperature_2m_max[0]);
+            const tempMin = Math.round(daily.temperature_2m_min[0]);
+            const uvIndex = daily.uv_index_max[0].toFixed(1);
+            
+            const condition = getWeatherCondition(code);
+
+            document.getElementById('weather-location').textContent = locationName;
+            document.getElementById('weather-condition').textContent = `${condition.icon} ${condition.text}`;
+            document.getElementById('weather-temp').textContent = `${temp}°C`;
+            document.getElementById('weather-description').textContent = `실시간 기상 데이터 반영 완료`;
+            
+            document.getElementById('weather-temp-range').textContent = `${tempMax}°C / ${tempMin}°C`;
+            document.getElementById('weather-humidity').textContent = `${humidity}%`;
+            document.getElementById('weather-wind').textContent = `${wind} km/h`;
+            
+            let uvStatus = "보통";
+            if (uvIndex >= 8) uvStatus = "매우 강함";
+            else if (uvIndex >= 6) uvStatus = "강함";
+            else if (uvIndex >= 3) uvStatus = "보통";
+            else uvStatus = "낮음";
+            document.getElementById('weather-uv').textContent = `${uvIndex} (${uvStatus})`;
+        }
+
+        function setWeatherError() {
+            document.getElementById('weather-condition').textContent = "⚠️ 에러";
+            document.getElementById('weather-description').textContent = "날씨 정보를 불러오지 못했습니다.";
+        }
+
+        async function loadDefaultWeather() {
+            // 기본 서울 좌표 (위도 37.566, Ground 126.9784)
+            const lat = 37.566;
+            const lon = 126.9784;
+            try {
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`;
+                const response = await fetch(weatherUrl);
+                const data = await response.json();
+                if (data && data.current) {
+                    updateWeatherUI("서울", data);
+                }
+            } catch (err) {
+                setWeatherError();
+            }
+        }
+
+        function loadWeatherByLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        let locationName = "현 위치";
+                        try {
+                            const geocodeUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ko`;
+                            const geoRes = await fetch(geocodeUrl);
+                            const geoData = await geoRes.json();
+                            if (geoData) {
+                                const city = geoData.city || "";
+                                const locality = geoData.locality || "";
+                                locationName = locality || city || "현 위치";
+                            }
+                        } catch (err) {
+                            console.error("도시명 로딩 실패:", err);
+                        }
+
+                        try {
+                            const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`;
+                            const response = await fetch(weatherUrl);
+                            const data = await response.json();
+
+                            if (data && data.current) {
+                                updateWeatherUI(locationName, data);
+                            }
+                        } catch (err) {
+                            console.error("날씨 API 로딩 실패:", err);
+                            setWeatherError();
+                        }
+                    },
+                    (error) => {
+                        console.warn("위치 정보 획득 실패 (기본 서울 날씨 로드):", error);
+                        loadDefaultWeather();
+                    }
+                );
+            } else {
+                loadDefaultWeather();
+            }
+        }
+
         // 초기 실행 및 다중 타이머 설정
         fetchNews();
         fetchExchangeRates();
         fetchStockIndices();
+        loadWeatherByLocation();
 
         // 1분(60초)마다 뉴스 및 환율 업데이트
         setInterval(() => {
@@ -772,6 +896,9 @@
 
         // 5초마다 주식 지수 실시간 업데이트
         setInterval(fetchStockIndices, 5000);
+
+        // 10분(600초)마다 실시간 날씨 및 위치 업데이트
+        setInterval(loadWeatherByLocation, 600000);
     </script>
 </body>
 
