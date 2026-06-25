@@ -513,7 +513,7 @@
                             // 일본 AI 동향 기사이고, 한글 번역이 활성화되어 있는 경우 본문 요약 번역 진행
                             if (currentSourceKey === 'ai') {
                                 transOpenBtn.style.display = 'inline-block';
-                                transOpenBtn.href = `https://translate.google.com/?sl=ja&tl=ko&op=translate&u=${encodeURIComponent(link)}`;
+                                transOpenBtn.href = getGoogleTranslateLink(link, 'ja', 'ko');
 
                                 if (isTranslated) {
                                     readerHeadline.textContent = translatedTitle;
@@ -588,6 +588,20 @@
                 }
             });
         });
+
+        // 구글 번역 신형 서브도메인 (.translate.goog) 주소 변환 헬퍼 함수
+        function getGoogleTranslateLink(originalUrl, sl = 'ja', tl = 'ko') {
+            try {
+                const urlObj = new URL(originalUrl);
+                const hostHyphenated = urlObj.hostname.replace(/\./g, '-');
+                const translateUrl = `https://${hostHyphenated}.translate.goog${urlObj.pathname}${urlObj.search}`;
+                const separator = translateUrl.includes('?') ? '&' : '?';
+                return `${translateUrl}${separator}_x_tr_sl=${sl}&_x_tr_tl=${tl}&_x_tr_hl=ko`;
+            } catch (e) {
+                console.error('번역 링크 변환 실패, Fallback 적용:', e);
+                return `https://translate.google.com/?sl=${sl}&tl=${tl}&op=translate&u=${encodeURIComponent(originalUrl)}`;
+            }
+        }
 
         // HTML 태그 제거 헬퍼 함수
         function stripHtml(html) {
