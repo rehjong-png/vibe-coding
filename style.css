@@ -1,0 +1,223 @@
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 10px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* ⏰ 실시간 시계 섹션 */
+        .clock-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .clock-date {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .clock-time {
+            font-size: 4rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -1px;
+        }
+
+        /* 하단 그리드 (날씨 & 뉴스) */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #edf2f7;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .update-indicator {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: normal;
+        }
+
+        /* 날씨 섹션 */
+        .weather-info {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .temp {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        .condition {
+            font-size: 1.2rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .details {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 0.95rem;
+            color: #718096;
+        }
+
+        .detail-item {
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        /* 📰 뉴스 섹션 */
+        .news-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .news-tabs::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 6px 16px;
+            cursor: pointer;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -10px;
+            /* border-bottom align with parent border */
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #2563eb;
+        }
+
+        .tab-btn.active {
+            color: #2563eb;
+            font-weight: 600;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .news-item {
+            display: block;
+            padding: 18px;
+            border-radius: 12px;
+            background: #f8fafc;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.25s ease-in-out;
+            border: 1px solid #e2e8f0;
+        }
+
+        .news-item:hover {
+            transform: translateY(-3px);
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .news-item:hover .news-title {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .news-source {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .news-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.5;
+            color: #1e293b;
+            transition: color 0.2s;
+        }
+
+        .loading {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px 0;
+            font-style: italic;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
