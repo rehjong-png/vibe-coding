@@ -1,0 +1,10 @@
+{
+    "liner.enabledByDefault": true,
+    "python-envs.pythonProjects": [
+        {
+            "path": "VibeCoding",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        }
+    ]
+}
